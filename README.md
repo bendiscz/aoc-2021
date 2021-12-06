@@ -1,3 +1,3 @@
 # Advent of Code 2021
 
-[Aoc 2021](https://adventofcode.com/2021) solutions in Go.
+[AoC 2021](https://adventofcode.com/2021) solutions in Go.

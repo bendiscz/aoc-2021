@@ -20,14 +20,6 @@ func main() {
 
 var pattern = regexp.MustCompile(`(\d+),(\d+) -> (\d+),(\d+)`)
 
-func abs(x int) int {
-	if x >= 0 {
-		return x
-	} else {
-		return -x
-	}
-}
-
 func dir(a1, a2 int) int {
 	if a1 < a2 {
 		return 1
@@ -65,11 +57,11 @@ func solve(reader io.Reader, pt2 bool) int {
 			for x := x1; x <= x2; x++ {
 				screen[x][y1]++
 			}
-		} else if pt2 && abs(x2-x1) == abs(y2-y1) {
+		} else if pt2 && aoc.Abs(x2-x1) == aoc.Abs(y2-y1) {
 			// part two
 			dx := dir(x1, x2)
 			dy := dir(y1, y2)
-			for i := 0; i <= abs(x2-x1); i++ {
+			for i := 0; i <= aoc.Abs(x2-x1); i++ {
 				screen[x1+dx*i][y1+dy*i]++
 			}
 		}

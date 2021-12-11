@@ -35,9 +35,6 @@ func init() {
 }
 
 func main() {
-
-	//input = []byte("acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf\n")
-
 	scanner := bufio.NewScanner(bytes.NewReader(input))
 	count1, count2 := 0, 0
 	for scanner.Scan() {

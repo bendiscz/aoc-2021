@@ -127,8 +127,8 @@ func readContainer(b *bits) (vsum int, results []int) {
 
 func readContainer0(b *bits) (vsum int, results []int) {
 	bl := b.read(15)
-	p := b.p
-	for b.p-p < bl {
+	pos := b.pos()
+	for b.pos()-pos < bl {
 		v, r := readPacket(b)
 		vsum += v
 		results = append(results, r)

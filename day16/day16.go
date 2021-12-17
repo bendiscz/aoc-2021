@@ -143,5 +143,5 @@ func readContainer1(b *bits) (vsum int, results []int) {
 		vsum += v
 		results = append(results, r)
 	}
-	return vsum, results
+	return
 }

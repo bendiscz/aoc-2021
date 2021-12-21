@@ -12,8 +12,6 @@ import (
 var input string
 
 func main() {
-	//input = "16,1,2,0,4,2,7,1,2,14\n"
-
 	fields := strings.FieldsFunc(strings.TrimSpace(input), func(r rune) bool {
 		return r == ','
 	})

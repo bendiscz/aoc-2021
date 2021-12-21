@@ -28,3 +28,17 @@ func MD5(data []byte) []byte {
 	md5.Write(data)
 	return md5.Sum(nil)
 }
+
+func Min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func Max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}

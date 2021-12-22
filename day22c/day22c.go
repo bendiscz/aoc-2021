@@ -24,27 +24,11 @@ type box struct {
 	weight int
 }
 
-func (b box) volume() int {
-	return b.a[0].size() * b.a[1].size() * b.a[2].size()
-}
+func (b box) volume() int { return b.a[0].size() * b.a[1].size() * b.a[2].size() }
 
-func makeBox(x1, x2, y1, y2, z1, z2 int, on bool) box {
-	b := box{a: [...]axis{{x1, x2}, {y1, y2}, {z1, z2}}}
-	if on {
-		b.weight = 1
-	} else {
-		b.weight = -1
-	}
-	return b
-}
-
-func (a axis) size() int {
-	return a.q - a.p + 1
-}
-
-func (a axis) intersects(b axis) bool {
-	return a.q >= b.p && a.p <= b.q
-}
+func (a axis) size() int              { return a.q - a.p + 1 }
+func (a axis) intersects(b axis) bool { return a.q >= b.p && a.p <= b.q }
+func (a axis) small() bool            { return a.p >= -50 && a.q <= 50 }
 
 func intersect(c1, c2 box) (box, bool) {
 	for i := 0; i < 3; i++ {
@@ -65,6 +49,7 @@ func intersect(c1, c2 box) (box, bool) {
 
 func main() {
 	t := time.Now()
+	partOneDone := false
 	var boxes []box
 	scanner := bufio.NewScanner(bytes.NewReader(input))
 	for scanner.Scan() {
@@ -72,27 +57,30 @@ func main() {
 		x1, x2 := aoc.ParseInt(m[2]), aoc.ParseInt(m[3])
 		y1, y2 := aoc.ParseInt(m[4]), aoc.ParseInt(m[5])
 		z1, z2 := aoc.ParseInt(m[6]), aoc.ParseInt(m[7])
+		bc := box{a: [...]axis{{x1, x2}, {y1, y2}, {z1, z2}}, weight: 1}
 
-		bc := makeBox(x1, x2, y1, y2, z1, z2, m[1] == "on")
-		var newBoxes []box
+		if !partOneDone && (!bc.a[0].small() || !bc.a[1].small() || !bc.a[2].small()) {
+			fmt.Printf("part one: %v (time %v)\n", count(boxes), time.Since(t))
+			partOneDone = true
+		}
 
-		for _, b := range boxes {
+		for _, b := range boxes[:] {
 			if bi, ok := intersect(bc, b); ok {
 				bi.weight = -1 * b.weight
-				newBoxes = append(newBoxes, bi)
+				boxes = append(boxes, bi)
 			}
 		}
 
-		if bc.weight == 1 {
-			newBoxes = append(newBoxes, bc)
+		if m[1] == "on" {
+			boxes = append(boxes, bc)
 		}
-
-		boxes = append(boxes, newBoxes...)
 	}
+	fmt.Printf("part two: %v (time %v)\n", count(boxes), time.Since(t))
+}
 
-	volume := 0
+func count(boxes []box) (volume int) {
 	for _, b := range boxes {
 		volume += b.weight * b.volume()
 	}
-	fmt.Printf("part two: %v\ntime: %v\n", volume, time.Since(t))
+	return
 }

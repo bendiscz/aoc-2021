@@ -9,8 +9,12 @@ import (
 	"math"
 	"regexp"
 	"sort"
+	"sync"
+	"sync/atomic"
 	"time"
 )
+
+const parallelize = true
 
 //go:embed input1
 var input []byte
@@ -85,41 +89,21 @@ func main() {
 	}
 
 	t := time.Now()
-	volume := 0
-	for k, sx := range sxs {
-		fmt.Printf("%d/%d\n", k, len(sxs))
-		ax := map[int]struct{}{}
-		for bx := range sx.boxes {
-			ax[bx] = struct{}{}
-		}
-		if len(ax) == 0 {
-			continue
-		}
-
-		for _, sy := range sys {
-			var axy []int
-			for by := range sy.boxes {
-				if _, ok := ax[by]; ok {
-					axy = append(axy, by)
-				}
-			}
-			if len(axy) == 0 {
-				continue
-			}
-			sort.Ints(axy)
-
-			for _, sz := range szs {
-				for i := len(axy) - 1; i >= 0; i-- {
-					if sz.has(axy[i]) {
-						if boxes[axy[i]].value {
-							volume += sx.size() * sy.size() * sz.size()
-						}
-						break
-					}
-				}
-			}
+	volume := uint64(0)
+	wg := &sync.WaitGroup{}
+	for _, sx := range sxs {
+		if parallelize {
+			wg.Add(1)
+			go func(sx *interval) {
+				computeLayer(boxes, sx, sys, szs, &volume)
+				wg.Done()
+			}(sx)
+		} else {
+			computeLayer(boxes, sx, sys, szs, &volume)
 		}
 	}
+
+	wg.Wait()
 
 	fmt.Printf("part two: %v\n", volume)
 	fmt.Printf("time: %v\n", time.Since(t))
@@ -163,4 +147,39 @@ func insert(ss []*interval, b, p, q int) []*interval {
 	}
 
 	return next
+}
+
+func computeLayer(boxes []box, sx *interval, sys, szs []*interval, volume *uint64) {
+	ax := map[int]struct{}{}
+	for bx := range sx.boxes {
+		ax[bx] = struct{}{}
+	}
+	if len(ax) == 0 {
+		return
+	}
+
+	for _, sy := range sys {
+		var axy []int
+		for by := range sy.boxes {
+			if _, ok := ax[by]; ok {
+				axy = append(axy, by)
+			}
+		}
+		if len(axy) == 0 {
+			continue
+		}
+		sort.Ints(axy)
+
+		for _, sz := range szs {
+			for i := len(axy) - 1; i >= 0; i-- {
+				if sz.has(axy[i]) {
+					if boxes[axy[i]].value {
+						v := sx.size() * sy.size() * sz.size()
+						atomic.AddUint64(volume, uint64(v))
+					}
+					break
+				}
+			}
+		}
+	}
 }

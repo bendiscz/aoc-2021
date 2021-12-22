@@ -38,9 +38,6 @@ func main() {
 	var c space
 	scanner := bufio.NewScanner(bytes.NewReader(input))
 	for scanner.Scan() {
-		if len(scanner.Text()) == 0 {
-			break
-		}
 		m := pattern.FindStringSubmatch(scanner.Text())
 		x1, x2, cx := parseInterval(m[2], m[3])
 		y1, y2, cy := parseInterval(m[4], m[5])

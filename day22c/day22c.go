@@ -1,0 +1,98 @@
+package main
+
+import (
+	"bufio"
+	"bytes"
+	_ "embed"
+	"fmt"
+	"github.com/bendiscz/aoc-2021"
+	"regexp"
+	"time"
+)
+
+//go:embed input1
+var input []byte
+
+var pattern = regexp.MustCompile(`^(on|off) x=(-?\d+)\.\.(-?\d+),y=(-?\d+)\.\.(-?\d+),z=(-?\d+)\.\.(-?\d+)$`)
+
+type axis struct {
+	p, q int
+}
+
+type box struct {
+	a      [3]axis
+	weight int
+}
+
+func (b box) volume() int {
+	return b.a[0].size() * b.a[1].size() * b.a[2].size()
+}
+
+func makeBox(x1, x2, y1, y2, z1, z2 int, on bool) box {
+	b := box{a: [...]axis{{x1, x2}, {y1, y2}, {z1, z2}}}
+	if on {
+		b.weight = 1
+	} else {
+		b.weight = -1
+	}
+	return b
+}
+
+func (a axis) size() int {
+	return a.q - a.p + 1
+}
+
+func (a axis) intersects(b axis) bool {
+	return a.q >= b.p && a.p <= b.q
+}
+
+func intersect(c1, c2 box) (box, bool) {
+	for i := 0; i < 3; i++ {
+		if !c1.a[i].intersects(c2.a[i]) {
+			return box{}, false
+		}
+	}
+
+	return box{
+		a: [3]axis{
+			{aoc.Max(c1.a[0].p, c2.a[0].p), aoc.Min(c1.a[0].q, c2.a[0].q)},
+			{aoc.Max(c1.a[1].p, c2.a[1].p), aoc.Min(c1.a[1].q, c2.a[1].q)},
+			{aoc.Max(c1.a[2].p, c2.a[2].p), aoc.Min(c1.a[2].q, c2.a[2].q)},
+		},
+		weight: 0,
+	}, true
+}
+
+func main() {
+	t := time.Now()
+	var boxes []box
+	scanner := bufio.NewScanner(bytes.NewReader(input))
+	for scanner.Scan() {
+		m := pattern.FindStringSubmatch(scanner.Text())
+		x1, x2 := aoc.ParseInt(m[2]), aoc.ParseInt(m[3])
+		y1, y2 := aoc.ParseInt(m[4]), aoc.ParseInt(m[5])
+		z1, z2 := aoc.ParseInt(m[6]), aoc.ParseInt(m[7])
+
+		bc := makeBox(x1, x2, y1, y2, z1, z2, m[1] == "on")
+		var newBoxes []box
+
+		for _, b := range boxes {
+			if bi, ok := intersect(bc, b); ok {
+				bi.weight = -1 * b.weight
+				newBoxes = append(newBoxes, bi)
+			}
+		}
+
+		if bc.weight == 1 {
+			newBoxes = append(newBoxes, bc)
+		}
+
+		boxes = append(boxes, newBoxes...)
+	}
+
+	volume := 0
+	for _, b := range boxes {
+		volume += b.weight * b.volume()
+	}
+	fmt.Printf("part two: %v\ntime: %v\n", volume, time.Since(t))
+}

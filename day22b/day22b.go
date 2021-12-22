@@ -8,6 +8,8 @@ import (
 	"github.com/bendiscz/aoc-2021"
 	"math"
 	"regexp"
+	"sort"
+	"time"
 )
 
 //go:embed input1
@@ -82,6 +84,7 @@ func main() {
 		szs = insert(szs, i, z1, z2)
 	}
 
+	t := time.Now()
 	volume := 0
 	for k, sx := range sxs {
 		fmt.Printf("%d/%d\n", k, len(sxs))
@@ -94,32 +97,32 @@ func main() {
 		}
 
 		for _, sy := range sys {
-			ay := map[int]struct{}{}
+			var axy []int
 			for by := range sy.boxes {
 				if _, ok := ax[by]; ok {
-					ay[by] = struct{}{}
+					axy = append(axy, by)
 				}
 			}
-			if len(ay) == 0 {
+			if len(axy) == 0 {
 				continue
 			}
+			sort.Ints(axy)
 
 			for _, sz := range szs {
-				last := -1
-				for b := range ay {
-					if b > last && sz.has(b) {
-						last = b
+				for i := len(axy) - 1; i >= 0; i-- {
+					if sz.has(axy[i]) {
+						if boxes[axy[i]].value {
+							volume += sx.size() * sy.size() * sz.size()
+						}
+						break
 					}
-				}
-
-				if last >= 0 && boxes[last].value {
-					volume += sx.size() * sy.size() * sz.size()
 				}
 			}
 		}
 	}
 
 	fmt.Printf("part two: %v\n", volume)
+	fmt.Printf("time: %v\n", time.Since(t))
 }
 
 func makeBox(x1, x2, y1, y2, z1, z2 int, value bool) box {

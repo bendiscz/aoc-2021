@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/bendiscz/aoc-2021"
+	"time"
 )
 
 type pod byte
@@ -162,6 +163,7 @@ type burrow struct {
 	hall hall
 	room [4]room
 	cost int
+	step int
 	prev *burrow
 }
 
@@ -179,17 +181,9 @@ func (b *burrow) key() [27]pod {
 
 func (b *burrow) next() *burrow {
 	n := *b
+	n.step++
 	n.prev = b
 	return &n
-}
-
-func (b *burrow) cycling() bool {
-	for p := b.prev; p != nil; p = p.prev {
-		if p.hall == b.hall && p.room == b.room {
-			return true
-		}
-	}
-	return false
 }
 
 func (b *burrow) done() bool {
@@ -311,7 +305,7 @@ func (b *burrow) room2hall(ri, hi int) *burrow {
 }
 
 func (b *burrow) print() {
-	fmt.Printf("%d\n#############\n#", b.cost)
+	fmt.Printf("#%d cost: %d\n#############\n#", b.step, b.cost)
 	for _, c := range b.hall.cell {
 		fmt.Printf("%v", c)
 	}
@@ -353,17 +347,9 @@ func emptyBurrow() *burrow {
 
 type queue []*burrow
 
-func (q queue) Len() int {
-	return len(q)
-}
-
-func (q queue) Less(i, j int) bool {
-	return q[i].cost < q[j].cost
-}
-
-func (q queue) Swap(i, j int) {
-	q[i], q[j] = q[j], q[i]
-}
+func (q queue) Len() int           { return len(q) }
+func (q queue) Less(i, j int) bool { return q[i].cost < q[j].cost }
+func (q queue) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
 
 func (q *queue) Push(x interface{}) {
 	*q = append(*q, x.(*burrow))
@@ -400,30 +386,42 @@ func search(start *burrow) *burrow {
 	return nil
 }
 
-func startPartOne() *burrow {
-	b := emptyBurrow()
-	b.room[0].cell = [...]pod{Block, Block, D, D}
-	b.room[1].cell = [...]pod{Block, Block, A, A}
-	b.room[2].cell = [...]pod{Block, Block, B, C}
-	b.room[3].cell = [...]pod{Block, Block, B, C}
-	return b
+var folded = [4][2]pod{{D, D}, {B, C}, {A, B}, {C, A}}
+
+func (b *burrow) unfold() *burrow {
+	n := *b
+	for ri := 0; ri < len(n.room); ri++ {
+		cell := &n.room[ri].cell
+		cell[0] = cell[2]
+		cell[1] = folded[ri][0]
+		cell[2] = folded[ri][1]
+	}
+	return &n
 }
 
-func startPartTwo() *burrow {
+func initBurrow(r01, r11, r21, r31, r02, r12, r22, r32 pod) *burrow {
 	b := emptyBurrow()
-	b.room[0].cell = [...]pod{D, D, D, D}
-	b.room[1].cell = [...]pod{A, B, C, A}
-	b.room[2].cell = [...]pod{B, A, B, C}
-	b.room[3].cell = [...]pod{B, C, A, C}
+	b.room[0].cell = [...]pod{Block, Block, r02, r01}
+	b.room[1].cell = [...]pod{Block, Block, r12, r11}
+	b.room[2].cell = [...]pod{Block, Block, r22, r21}
+	b.room[3].cell = [...]pod{Block, Block, r32, r31}
 	return b
 }
 
 func main() {
-	b1 := search(startPartOne())
-	//b1.printPath()
-	fmt.Printf("part one: %v\n", b1.cost)
+	//s1 := initBurrow(
+	//	B, C, B, D,
+	//	A, D, C, A)
+	s1 := initBurrow(
+		D, A, C, C,
+		D, A, B, B)
+	s2 := s1.unfold()
 
-	b2 := search(startPartTwo())
+	t1, b1 := time.Now(), search(s1)
+	//b1.printPath()
+	fmt.Printf("part one: %d (%d steps)\ntime: %v\n\n\n", b1.cost, b1.step, time.Since(t1))
+
+	t2, b2 := time.Now(), search(s2)
 	//b2.printPath()
-	fmt.Printf("part two: %v\n", b2.cost)
+	fmt.Printf("part two: %d (%d steps)\ntime: %v\n", b2.cost, b2.step, time.Since(t2))
 }

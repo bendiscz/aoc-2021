@@ -5,6 +5,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"time"
 )
 
 //go:embed input1
@@ -23,13 +24,14 @@ func main() {
 	}
 	s.h, s.w = len(s.rows), len(s.rows[0])
 
+	t := time.Now()
 	count := 1
 	for s.move() {
 		count++
 	}
 
-	fmt.Printf("part one: %v\n", count)
-	fmt.Printf("part two: %v\n", 0)
+	fmt.Printf("part one: %v (time %v)\n", count, time.Since(t))
+	fmt.Printf("part two: %v\n", "Merry Christmas!")
 }
 
 func (s *sea) move() (moved bool) {

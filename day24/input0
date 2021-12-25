@@ -1,0 +1,303 @@
+W1+13
+inp w
+mul x 0  0
+add x z  0
+mod x 26 0
+div z 1  0
+add x 10 10
+eql x w  0
+eql x 0  1
+mul y 0  0
+add y 25 25
+mul y x  25
+add y 1  26
+mul z y  0
+mul y 0  0
+add y w  W
+add y 13 W+13
+mul y x  W+13
+add z y  W+13
+
+W2+10
+inp w    W2
+mul x 0  0
+add x z  W1+13
+mod x 26 W1+13
+div z 1  W1+13
+add x 13 W1+26
+eql x w  0
+eql x 0  1
+mul y 0  0
+add y 25 25
+mul y x  25
+add y 1  26
+mul z y  (W1+13)*26
+mul y 0  0
+add y w  W2
+add y 10 W2+10
+mul y x  W2+10
+add z y  (W1+13)*26+(W2+10)
+
+
+W3+3
+inp w    W3
+mul x 0  0
+add x z  (W1+13)*26+(W2+10)
+mod x 26 ((W1+13)*26+(W2+10))%26
+div z 1  (W1+13)*26+(W2+10)
+add x 13 ((W1+13)*26+(W2+10))%26+13
+eql x w  0
+eql x 0  1
+mul y 0  0
+add y 25 25
+mul y x  25
+add y 1  26
+mul z y  ((W1+13)*26+(W2+10))*26
+mul y 0  0
+add y w  W3
+add y 3  W3+3
+mul y x  W3+3
+add z y  ((W1+13)*26+(W2+10))*26+(W3+3)
+
+998949
+
+W4+1
+inp w     W4
+mul x 0   0
+add x z   ((W1+13)*26+(W2+10))*26+(W3+3)
+mod x 26  W3+3
+div z 26  (W1+13)*26+(W2+10)
+add x -11 W3-8
+eql x w   1 !!!   W3 == 8
+eql x 0   0
+mul y 0   0
+add y 25  25
+mul y x   0
+add y 1   1
+mul z y   (((W1+13)*26+(W2+10))*26+(W3+3))/26
+mul y 0   0
+add y w   W4
+add y 1   W4+1
+mul y x   0
+add z y   (((W1+13)*26+(W2+10))*26+(W3+3))/26 = (W1+13)*26+(W2+10)
+
+eql x w   0 !!!   W3 != 8
+eql x 0   1
+mul y 0   0
+add y 25  25
+mul y x   25
+add y 1   26
+mul z y   ((W1+13)*26+(W2+10))*26
+mul y 0   0
+add y w   W4
+add y 1   W4+1
+mul y x   W4+1
+add z y   ((W1+13)*26+(W2+10))*26+(W4+1)
+
+
+W5+9
+inp w    W5
+mul x 0  0
+add x z  (W1+13)*26+(W2+10)
+mod x 26
+div z 1
+add x 11
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 9
+mul y x
+add z y
+
+
+W6+3
+inp w
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -4
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 3
+mul y x
+add z y
+
+
+W7+5
+inp w
+mul x 0
+add x z
+mod x 26
+div z 1
+add x 12
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 5
+mul y x
+add z y
+
+
+W8+1
+inp w
+mul x 0
+add x z
+mod x 26
+div z 1
+add x 12
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 1
+mul y x
+add z y
+
+
+W9+0
+inp w
+mul x 0
+add x z
+mod x 26
+div z 1
+add x 15
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 0
+mul y x
+add z y
+
+W10+13  -2 == W
+inp w
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -2
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 13
+mul y x
+add z y
+
+W11+7
+-5 == W
+inp w
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -5
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 7
+mul y x
+add z y
+
+W12+15
+-11 == W
+inp w
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -11
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 15
+mul y x
+add z y
+
+W13+12
+-13 == W
+inp w
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -13
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 12
+mul y x
+add z y
+
+W14+8 P-10 == W
+inp w
+mul x 0   0
+add x z   z0
+mod x 26  z0%26
+div z 26  z0/26
+add x -10 z0%26-10
+eql x w   !!!
+eql x 0   0
+mul y 0   0
+add y 25  25
+mul y x   0
+add y 1   1
+mul z y   (z0/26)
+mul y 0   0
+add y w   W
+add y 8   W+8
+mul y x   0
+add z y   z0/26

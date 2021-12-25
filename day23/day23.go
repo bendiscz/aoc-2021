@@ -18,52 +18,23 @@ const (
 	Block
 )
 
-func (p pod) String() string {
-	switch p {
-	case A:
-		return "A"
-	case B:
-		return "B"
-	case C:
-		return "C"
-	case D:
-		return "D"
-	case None:
-		return "."
-	default:
-		return "#"
-	}
+var podAttrs = [...]struct {
+	string     string
+	cost, home int
+	key        key
+}{
+	None:  {".", 0, 0, 0},
+	A:     {"A", 1, 0, 1},
+	B:     {"B", 10, 1, 2},
+	C:     {"C", 100, 2, 3},
+	D:     {"D", 1000, 3, 4},
+	Block: {"#", 0, 0, 0},
 }
 
-func (p pod) cost() int {
-	switch p {
-	case A:
-		return 1
-	case B:
-		return 10
-	case C:
-		return 100
-	case D:
-		return 1000
-	default:
-		panic("cost not defined")
-	}
-}
-
-func (p pod) home() int {
-	switch p {
-	case A:
-		return 0
-	case B:
-		return 1
-	case C:
-		return 2
-	case D:
-		return 3
-	default:
-		panic("home not defined")
-	}
-}
+func (p pod) String() string { return podAttrs[p].string }
+func (p pod) cost() int      { return podAttrs[p].cost }
+func (p pod) home() int      { return podAttrs[p].home }
+func (p pod) key() key       { return podAttrs[p].key }
 
 type room struct {
 	id   int
@@ -167,15 +138,17 @@ type burrow struct {
 	prev *burrow
 }
 
-type key [27]pod
+type key uint64
 
-func (b *burrow) key() [27]pod {
-	k := [27]pod{}
-	copy(k[:], b.hall.cell[:])
-	copy(k[11:], b.room[0].cell[:])
-	copy(k[15:], b.room[1].cell[:])
-	copy(k[19:], b.room[2].cell[:])
-	copy(k[23:], b.room[3].cell[:])
+func (b *burrow) key() (k key) {
+	for _, c := range b.hall.cell {
+		k = k*5 + c.key()
+	}
+	for ri := 0; ri < len(b.room); ri++ {
+		for _, c := range b.room[ri].cell {
+			k = k*5 + c.key()
+		}
+	}
 	return k
 }
 
@@ -199,26 +172,24 @@ func (b *burrow) done() bool {
 }
 
 func (b *burrow) steps() (s []*burrow) {
-	// move from hall to rooms
 	for hi := 0; hi < len(b.hall.cell); hi++ {
 		if n := b.hall2room(hi); n != nil {
 			s = append(s, n)
 		}
 	}
+	if len(s) > 0 {
+		return
+	}
 
-	// move from rooms to rooms
 	for ri := 0; ri < len(b.room); ri++ {
 		if n := b.room2room(ri); n != nil {
 			s = append(s, n)
 		}
 	}
-
 	if len(s) > 0 {
-		// moving pods to their rooms is always better than moving pods to the hall
 		return
 	}
 
-	// move from rooms to hall
 	for ri := 0; ri < len(b.room); ri++ {
 		for hi := b.room[ri].hallEntry() - 1; hi >= 0 && b.hall.cell[hi] == None; hi-- {
 			if n := b.room2hall(ri, hi); n != nil {

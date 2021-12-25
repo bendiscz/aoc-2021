@@ -15,7 +15,6 @@ var input []byte
 
 type block struct {
 	index    int
-	cond     bool
 	sub, add int
 }
 
@@ -48,14 +47,11 @@ func readBlock(scanner *bufio.Scanner, index int) block {
 	b := block{index: index}
 	for i := 0; i < 18; i++ {
 		scanner.Scan()
-		tokens := strings.Split(scanner.Text(), " ")
-		switch {
-		case i == 4:
-			b.cond = aoc.ParseInt(tokens[2]) == 26
-		case i == 5 && b.cond:
-			b.sub = aoc.ParseInt(tokens[2])
-		case i == 15:
-			b.add = aoc.ParseInt(tokens[2])
+		switch i {
+		case 5:
+			b.sub = aoc.ParseInt(strings.Split(scanner.Text(), " ")[2])
+		case 15:
+			b.add = aoc.ParseInt(strings.Split(scanner.Text(), " ")[2])
 		}
 	}
 	return b
@@ -68,7 +64,7 @@ func main() {
 	var links []link
 	for i := 0; i < 14; i++ {
 		b := readBlock(scanner, i)
-		if b.cond {
+		if b.sub < 0 {
 			p := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			links = append(links, link{p.index, b.index, p.add + b.sub})

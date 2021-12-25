@@ -5,31 +5,87 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"regexp"
+	"github.com/bendiscz/aoc-2021"
 	"strings"
-	"unicode"
+	"time"
 )
 
-//go:embed input0
+//go:embed input1
 var input []byte
 
-var pattern = regexp.MustCompile(`^$`)
+type block struct {
+	index    int
+	cond     bool
+	sub, add int
+}
+
+type link struct {
+	i1, i2 int
+	diff   int
+}
+
+func (l link) max() (int, int) {
+	if l.diff > 0 {
+		return 9 - l.diff, 9
+	} else {
+		return 9, 9 + l.diff
+	}
+}
+
+func (l link) min() (int, int) {
+	if l.diff > 0 {
+		return 1, 1 + l.diff
+	} else {
+		return 1 - l.diff, 1
+	}
+}
+
+func digit(x int) byte {
+	return byte('0' + x)
+}
+
+func readBlock(scanner *bufio.Scanner, index int) block {
+	b := block{index: index}
+	for i := 0; i < 18; i++ {
+		scanner.Scan()
+		tokens := strings.Split(scanner.Text(), " ")
+		switch {
+		case i == 4:
+			b.cond = aoc.ParseInt(tokens[2]) == 26
+		case i == 5 && b.cond:
+			b.sub = aoc.ParseInt(tokens[2])
+		case i == 15:
+			b.add = aoc.ParseInt(tokens[2])
+		}
+	}
+	return b
+}
 
 func main() {
+	t := time.Now()
 	scanner := bufio.NewScanner(bytes.NewReader(input))
-	for scanner.Scan() {
-		line := scanner.Text()
-		m := pattern.FindStringSubmatch(scanner.Text())
-		_, _ = line, m
+	var stack []block
+	var links []link
+	for i := 0; i < 14; i++ {
+		b := readBlock(scanner, i)
+		if b.cond {
+			p := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			links = append(links, link{p.index, b.index, p.add + b.sub})
+		} else {
+			stack = append(stack, b)
+		}
 	}
 
-	fields := strings.FieldsFunc(string(input), func(r rune) bool {
-		return unicode.IsSpace(r) || r == ','
-	})
-	for _, f := range fields {
-		_ = f
+	var max, min [14]byte
+	for _, l := range links {
+		max1, max2 := l.max()
+		max[l.i1], max[l.i2] = digit(max1), digit(max2)
+		min1, min2 := l.min()
+		min[l.i1], min[l.i2] = digit(min1), digit(min2)
 	}
 
-	fmt.Printf("part one: %v\n", 0)
-	fmt.Printf("part two: %v\n", 0)
+	fmt.Printf("part one: %s\n", string(max[:]))
+	fmt.Printf("part two: %s\n", string(min[:]))
+	fmt.Printf("time: %v\n", time.Since(t))
 }
